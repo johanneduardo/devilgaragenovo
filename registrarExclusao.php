@@ -13,14 +13,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['idUser']) && !empt
     // Itens a serem excluídos
     $items = $data->items;
 
-    // Preparar a query SQL para inserir as exclusões
-    $stmt = $pdo->prepare("INSERT INTO exclusoes (id_usuario, item, valor) VALUES (:id_usuario, :item, :valor)");
+    // Preparar a query SQL para deletar as exclusões
+    $stmt = $pdo->prepare("DELETE FROM compras WHERE id_usuario = :id_usuario AND item = :item AND valor = :valor");
 
     try {
         // Iniciar transação
         $pdo->beginTransaction();
 
-        // Iterar sobre os itens e executar a inserção
+        // Iterar sobre os itens e executar a deleção
         foreach ($items as $item) {
             $stmt->execute(['id_usuario' => $idUsuario, 'item' => $item->name, 'valor' => $item->value]);
         }
@@ -28,11 +28,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['idUser']) && !empt
         // Confirmar a transação
         $pdo->commit();
 
-        // Verificar se as inserções foram bem-sucedidas
+        // Verificar se as deleções foram bem-sucedidas
         if ($stmt->rowCount() > 0) {
             echo json_encode(['success' => true]);
         } else {
-            echo json_encode(['success' => false, 'message' => 'Nenhum registro foi inserido']);
+            echo json_encode(['success' => false, 'message' => 'Nenhum registro foi deletado']);
         }
 
     } catch (PDOException $e) {
