@@ -13,26 +13,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['idUser']) && !empt
     // Itens a serem excluídos
     $items = $data->items;
 
-    // Preparar a query SQL para deletar as exclusões
-    $stmt = $pdo->prepare("DELETE FROM compras WHERE id_usuario = :id_usuario AND item = :item AND valor = :valor");
+    // Preparar as queries SQL para inserir as exclusões e deletar da tabela de compras
+    $insertStmt = $pdo->prepare("INSERT INTO exclusoes (id_usuario, item, valor) VALUES (:id_usuario, :item, :valor)");
+    $deleteStmt = $pdo->prepare("DELETE FROM compras WHERE id_usuario = :id_usuario AND item = :item AND valor = :valor");
 
     try {
         // Iniciar transação
         $pdo->beginTransaction();
 
-        // Iterar sobre os itens e executar a deleção
+        // Iterar sobre os itens e executar a inserção e deleção
         foreach ($items as $item) {
-            $stmt->execute(['id_usuario' => $idUsuario, 'item' => $item->name, 'valor' => $item->value]);
+            // Inserir na tabela de exclusões
+            $insertStmt->execute(['id_usuario' => $idUsuario, 'item' => $item->name, 'valor' => $item->value]);
+
+            // Deletar da tabela de compras
+            $deleteStmt->execute(['id_usuario' => $idUsuario, 'item' => $item->name, 'valor' => $item->value]);
         }
 
         // Confirmar a transação
         $pdo->commit();
 
-        // Verificar se as deleções foram bem-sucedidas
-        if ($stmt->rowCount() > 0) {
+        // Verificar se as operações foram bem-sucedidas
+        if ($insertStmt->rowCount() > 0 && $deleteStmt->rowCount() > 0) {
             echo json_encode(['success' => true]);
         } else {
-            echo json_encode(['success' => false, 'message' => 'Nenhum registro foi deletado']);
+            echo json_encode(['success' => false, 'message' => 'Nenhum registro foi modificado']);
         }
 
     } catch (PDOException $e) {

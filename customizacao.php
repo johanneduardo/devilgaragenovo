@@ -174,7 +174,7 @@ if (isset($_SESSION['idUser']) && !empty($_SESSION['idUser'])):
     }).then(response => response.json()).then(data => {
         if (data.success) {
             // Limpar seleções e atualizar custo total
-            motoSelect.value = "0";
+            document.getElementById('moto').value = "0";
             customItems.forEach(item => {
                 item.checked = false;
             });
@@ -188,11 +188,6 @@ if (isset($_SESSION['idUser']) && !empty($_SESSION['idUser'])):
     });
 }
 
-
-            motoSelect.addEventListener('change', updateTotalCost);
-            customItems.forEach(item => {
-                item.addEventListener('change', updateTotalCost);
-            });
 
             window.comprar = comprar;
             window.excluir = excluir;
