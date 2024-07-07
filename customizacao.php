@@ -98,7 +98,7 @@ if (isset($_SESSION['idUser']) && !empty($_SESSION['idUser'])):
                     <label for="motor">Motor - R$5.000</label>
                 </div>
 
-                <div class="total-cost" id="totalCost">Valor total: R$0,00</div>
+                <div class="total-cost" id="totalCost">Valor total: </div>
 
                 <div class="button-container">
                     <button type="button" class="btn btn-success btn-custom" onclick="comprar()">Comprar</button>
@@ -113,25 +113,30 @@ if (isset($_SESSION['idUser']) && !empty($_SESSION['idUser'])):
     </footer>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const motoSelect = document.getElementById('moto');
-            const customItems = document.querySelectorAll('.custom-item input');
-            const totalCostElement = document.getElementById('totalCost');
+    document.addEventListener('DOMContentLoaded', function () {
+        const motoSelect = document.getElementById('moto');
+        const customItems = document.querySelectorAll('.custom-item input');
+        const totalCostElement = document.getElementById('totalCost');
 
-            function updateTotalCost() {
-                let totalCost = parseFloat(motoSelect.value) || 0;
+        function updateTotalCost() {
+            let totalCost = parseFloat(motoSelect.value) || 0;
 
-                customItems.forEach(item => {
-                    if (item.checked) {
-                        totalCost += parseFloat(item.value);
-                    }
-                });
+            customItems.forEach(item => {
+                if (item.checked) {
+                    totalCost += parseFloat(item.value);
+                }
+            });
 
-                totalCostElement.textContent = 'Valor total: R$' + totalCost.toLocaleString('pt-BR', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                });
-            }
+            totalCostElement.textContent = 'Valor total: R$' + totalCost.toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        motoSelect.addEventListener('change', updateTotalCost);
+        customItems.forEach(item => {
+            item.addEventListener('change', updateTotalCost);
+        });
 
             function comprar() {
                 const items = [];
@@ -158,9 +163,16 @@ if (isset($_SESSION['idUser']) && !empty($_SESSION['idUser'])):
 
             function excluir() {
     const customItems = document.querySelectorAll('.custom-item input:checked');
+    const motoSelect = document.getElementById('moto');
 
     // Criar um array para armazenar os itens selecionados
     const items = [];
+
+    // Adicionar a moto selecionada aos itens, se houver uma moto selecionada
+    if (parseFloat(motoSelect.value) > 0) {
+        items.push({ name: motoSelect.options[motoSelect.selectedIndex].text, value: parseFloat(motoSelect.value) });
+    }
+
     customItems.forEach(item => {
         items.push({ name: item.nextElementSibling.textContent.trim(), value: parseFloat(item.value) });
     });
@@ -174,7 +186,7 @@ if (isset($_SESSION['idUser']) && !empty($_SESSION['idUser'])):
     }).then(response => response.json()).then(data => {
         if (data.success) {
             // Limpar seleções e atualizar custo total
-            document.getElementById('moto').value = "0";
+            motoSelect.value = "0";
             customItems.forEach(item => {
                 item.checked = false;
             });

@@ -30,11 +30,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['idUser']) && !empt
             $deleteStmt->execute(['id_usuario' => $idUsuario, 'item' => $item->name, 'valor' => $item->value]);
         }
 
+        // Também deletar a moto da tabela de compras
+        $deleteMotoStmt = $pdo->prepare("DELETE FROM compras WHERE id_usuario = :id_usuario AND item = 'Moto Harley'");
+        $deleteMotoStmt->execute(['id_usuario' => $idUsuario]);
+
         // Confirmar a transação
         $pdo->commit();
 
         // Verificar se as operações foram bem-sucedidas
-        if ($insertStmt->rowCount() > 0 && $deleteStmt->rowCount() > 0) {
+        if ($insertStmt->rowCount() > 0 || $deleteStmt->rowCount() > 0 || $deleteMotoStmt->rowCount() > 0) {
             echo json_encode(['success' => true]);
         } else {
             echo json_encode(['success' => false, 'message' => 'Nenhum registro foi modificado']);
